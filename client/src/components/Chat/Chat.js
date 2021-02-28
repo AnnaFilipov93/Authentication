@@ -5,7 +5,7 @@ import io from "socket.io-client";
 
 let socket;
 
-var connectionOptions =  {
+const connectionOptions =  {
     "force new connection" : true,
     "reconnectionAttempts": "Infinity", 
     "timeout" : 10000,                  
@@ -29,7 +29,14 @@ const Chat = ({location}) => {
         setName(name);
         setRoom(room);
 
-        console.log(socket);
+        socket.emit('join', { name, room }, () => {
+           
+          });
+
+          return () => {
+              socket.emit('disconnect');
+              socket.off();
+          }
 
         
 
