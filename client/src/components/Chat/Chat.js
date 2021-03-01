@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import queryString from 'query-string';
 import io from "socket.io-client";
 
+import './Chat.css';
+import InfoBar from "../InfoBar/InfoBar";
 
 let socket;
 
@@ -16,6 +18,8 @@ const Chat = ({location}) => {
 
     const [name, setName] = useState('');
     const [room, setRoom] = useState('');
+    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState([]);
     const ENDPOINT = 'http://localhost:5000/';
     
 
@@ -23,7 +27,6 @@ const Chat = ({location}) => {
 
         const {name,room} = queryString.parse(location.search);
 
-       // socket = io(ENDPOINT);
         socket = io.connect(ENDPOINT,connectionOptions);
         
         setName(name);
@@ -40,10 +43,45 @@ const Chat = ({location}) => {
 
         
 
-    } , [ENDPOINT,location.search]);
+    } , [ENDPOINT, location.search]);
+
+    useEffect( () => {
+
+        //Listen to the message from server/index
+        socket.on('message', (message) => {
+            //spread messages and add one message on it
+            setMessages(messages => [...messages, message]);
+        });
+
+        //Run it only when messages array changes
+    }, [messages]);
+
+    //function for sending messages
+    const sendMessage = (event) => {
+
+        //Prevent the refreshing page default (onclick/onkeypress)
+        event.preventDefault();
+
+        if(message) {
+
+            socket.emit('sendMessage', message, () => setMessage(''));
+        }
+    }
+
+    console.log(message , messages);
 
     return (
-        <h1>Chat</h1>
+        <div className = "outerContainer">
+            <div className = "container">
+                <InfoBar room = {room}/>
+               {/*<input 
+                    value = {message} 
+                    onChange = {(event) => setMessage(event.target.value)}
+                    onKeyPress = {(event) => event.key === 'Enter' ? sendMessage(event) : null } 
+               />*/}
+
+            </div>
+        </div>
     )
 };
 

@@ -20,16 +20,22 @@ io.on('connect', (socket) => {
 
         //Send message to the user
         socket.emit('message' , {user:'admin', text: `${user.name}, welcome to room ${user.room}`});
-        //send massage to everyone
-        socket.broadcast.to(user.room).emit('message', {user:'admin', text: `${user.name}, has joined to room`} );
+        //send message to everyone
+        socket.broadcast.to(user.room).emit('message', {user:'admin', text: `${user.name}, has joined to the room`} );
 
         //connect to the room
-        socket.join(user,room);
+        socket.join(user.room);
         
         callback();
     });
 
-    socket.on('sendMessage', () => {
+    socket.on('sendMessage', (message, callback) => {
+
+        const user = getUser(socket.id);
+
+        io.to(user.room).emit('message', {user: user.name, text: message});
+
+        callback();
 
     });
 
